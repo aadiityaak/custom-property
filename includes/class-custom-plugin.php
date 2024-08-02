@@ -149,6 +149,11 @@ class Custom_Plugin
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-function.php';
 
+		/**
+		 * Custom Profile
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-profile.php';
+
 		$this->loader = new Custom_Plugin_Loader();
 	}
 
