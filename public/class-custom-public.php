@@ -96,8 +96,9 @@ class Custom_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/script.min.js', array( 'jquery' ), $this->version, false );
 		wp_enqueue_script( 'lockr-js', plugin_dir_url( __FILE__ ) . 'js/lockr.min.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( 'chained-custom-js', plugin_dir_url( __FILE__ ) . 'js/chained-custom.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/script.min.js', array( 'jquery' ), $this->version, false );
 		
 		// Path ke file JSON
 		$json_state = plugin_dir_url( __FILE__ ) . 'data/state.json';

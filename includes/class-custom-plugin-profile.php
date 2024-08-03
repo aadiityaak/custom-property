@@ -24,13 +24,26 @@ class CMB2_Frontend_User_Meta_Bs
             'type'    => 'text',
         ));
 
+        $user_meta_province = get_user_meta( get_current_user_id(), $this->prefix . 'province', true );
         $cmb_user->add_field(array(
             'name'    => 'Povinsi',
             'id'      => $this->prefix . 'province',
             'type'    => 'select',
-            'options' => array(
-                '' => 'Loading...',
-            ),
+            'options' => ['' => 'Loading...'],
+            'attributes' => [
+                'data-current' => $user_meta_province
+            ]
+        ));
+
+        $user_meta_city = get_user_meta( get_current_user_id(), $this->prefix . 'city', true );
+        $cmb_user->add_field(array(
+            'name'    => 'Kota',
+            'id'      => $this->prefix . 'city',
+            'type'    => 'select',
+            'options' => ['' => 'Loading...'],
+            'attributes' => [
+                'data-current' => $user_meta_city
+            ]
         ));
 
         $cmb_user->add_field(array(
