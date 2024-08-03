@@ -103,13 +103,13 @@ class Custom_Public {
 		// Path ke file JSON
 		$json_state = plugin_dir_url( __FILE__ ) . 'data/state.json';
 		$json_city = plugin_dir_url( __FILE__ ) . 'data/city.json';
-		$json_address = plugin_dir_url( __FILE__ ) . 'data/address.json';
+		$json_district = plugin_dir_url( __FILE__ ) . 'data/district.json';
 
 		// Lokalisasi script dengan path JSON
 		wp_localize_script( $this->plugin_name, 'customPluginData', array(
 			'jsonState' => $json_state,
 			'jsonCity' => $json_city,
-			'jsonAddress' => $json_address
+			'jsonDistrict' => $json_district
 		));
 	}
 

@@ -71,17 +71,3 @@
   $.fn.chainedTo = $.fn.chained;
   $.fn.chained.defaults = {};
 })(window.jQuery || window.Zepto, window, document);
-
-(function ($) {
-  // Inisialisasi chained untuk elemen select saat dokumen siap
-  $(document).ready(function () {
-    $("#cp_city").chained("#cp_province");
-
-    // Populate the selects and re-initialize chained plugin
-    populateSelect("cp_province", "stateData");
-    populateSelect("cp_city", "cityData");
-
-    // Re-initialize chained plugin after populating selects
-    $("#cp_city").chained("#cp_province");
-  });
-})(jQuery);

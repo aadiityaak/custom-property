@@ -46,6 +46,17 @@ class CMB2_Frontend_User_Meta_Bs
             ]
         ));
 
+        $user_meta_district = $_POST[$this->prefix . 'district'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'district', true );
+        $cmb_user->add_field(array(
+            'name'    => 'Kecamatan',
+            'id'      => $this->prefix . 'district',
+            'type'    => 'select',
+            'options' => ['' => 'Loading...'],
+            'attributes' => [
+                'data-current' => $user_meta_district
+            ]
+        ));
+
         $cmb_user->add_field(array(
             'name'    => 'Address',
             'id'      => $this->prefix . 'address',
@@ -63,6 +74,14 @@ class CMB2_Frontend_User_Meta_Bs
             'id'      => $this->prefix . 'email',
             'type'    => 'text_email',
         ));
+
+        $cmb_user->add_field(array(
+            'name'    => 'Foto KTP',
+            'id'      => $this->prefix . 'ktp',
+            'type'    => 'file',
+        ));
+
+
     }
 
     public function render_user_meta_form($atts = array())
@@ -115,7 +134,7 @@ class CMB2_Frontend_User_Meta_Bs
             'cmb2_textarea'                             => 'cmb2_textarea form-control w-100',
             'cmb2-textarea-small'                       => 'cmb2-textarea-small form-control d-inline-block',
             'cmb2_select'                               => 'cmb2_select form-select',
-            'cmb2-upload-file regular-text'             => 'cmb2-upload-file regular-text d-block w-100',
+            'cmb2-upload-file regular-text'             => 'cmb2-upload-file regular-text form-control d-block w-100',
             'type="radio" class="cmb2-option"'          => 'type="radio" class="cmb2-option form-check-input"',
             'type="checkbox" class="cmb2-option"'       => 'type="checkbox" class="cmb2-option form-check-input"',
             'class="button-primary"'                    => 'class="button-primary btn btn-primary float-end"',
@@ -158,4 +177,4 @@ class CMB2_Frontend_User_Meta_Bs
 $CMB2_Frontend_User_Meta_Bs = new CMB2_Frontend_User_Meta_Bs();
 
 // Remove the action hook
-remove_action('cmb2_init', array($CMB2_Frontend_User_Meta_Bs, 'register_user_frontend_form'));
+// remove_action('cmb2_init', array($CMB2_Frontend_User_Meta_Bs, 'register_user_frontend_form'));
