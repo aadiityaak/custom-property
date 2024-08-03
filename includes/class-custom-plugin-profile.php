@@ -19,9 +19,18 @@ class CMB2_Frontend_User_Meta_Bs
         ));
 
         $cmb_user->add_field(array(
-            'name'    => 'Full Name',
+            'name'    => 'Nama Lengkap',
             'id'      => $this->prefix . 'full_name',
             'type'    => 'text',
+        ));
+
+        $cmb_user->add_field(array(
+            'name'    => 'Povinsi',
+            'id'      => $this->prefix . 'province',
+            'type'    => 'select',
+            'options' => array(
+                '' => 'Loading...',
+            ),
         ));
 
         $cmb_user->add_field(array(
@@ -90,7 +99,7 @@ class CMB2_Frontend_User_Meta_Bs
             'cmb2-timepicker'                           => 'cmb2-timepicker form-control d-inline-block',
             'cmb2-datepicker'                           => 'cmb2-datepicker d-inline-block',
             'cmb2-text-money'                           => 'cmb2-text-money form-control d-inline-block',
-            'cmb2_textarea'                             => 'cmb2_textarea form-control',
+            'cmb2_textarea'                             => 'cmb2_textarea form-control w-100',
             'cmb2-textarea-small'                       => 'cmb2-textarea-small form-control d-inline-block',
             'cmb2_select'                               => 'cmb2_select form-select',
             'cmb2-upload-file regular-text'             => 'cmb2-upload-file regular-text d-block w-100',

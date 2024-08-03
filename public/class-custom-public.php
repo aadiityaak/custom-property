@@ -97,7 +97,19 @@ class Custom_Public {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/script.min.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( 'lockr-js', plugin_dir_url( __FILE__ ) . 'js/lockr.min.js', array( 'jquery' ), $this->version, false );
+		
+		// Path ke file JSON
+		$json_state = plugin_dir_url( __FILE__ ) . 'data/state.json';
+		$json_city = plugin_dir_url( __FILE__ ) . 'data/city.json';
+		$json_address = plugin_dir_url( __FILE__ ) . 'data/address.json';
 
+		// Lokalisasi script dengan path JSON
+		wp_localize_script( $this->plugin_name, 'customPluginData', array(
+			'jsonState' => $json_state,
+			'jsonCity' => $json_city,
+			'jsonAddress' => $json_address
+		));
 	}
 
 }
