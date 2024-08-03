@@ -116,7 +116,7 @@ class Custom_Plugin
 		/**
 		 * Class untuk mendaftarkan custom post type.
 		 */
-		// require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-post-type.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-post-type.php';
 
 		/**
 		 * Class untuk menggunakan backend post fiel metabox io.
@@ -153,6 +153,7 @@ class Custom_Plugin
 		 * Custom Profile
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-profile.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/cmb2-frontend-property-submit.php';
 
 		$this->loader = new Custom_Plugin_Loader();
 	}

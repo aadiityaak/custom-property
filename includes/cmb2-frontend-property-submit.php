@@ -1,63 +1,70 @@
 <?php
-class CMB2_Frontend_User_Meta_Bs
+class CMB2_Frontend_Property_Submit
 {
     private $prefix = 'cp_';
 
     public function __construct()
     {
-        add_shortcode('cmb-user-meta-form', array($this, 'render_user_meta_form'));
-        add_action('cmb2_init', array($this, 'register_user_frontend_form'));
+        add_shortcode('cmb-property-meta-form', array($this, 'render_property_meta_form'));
+        add_action('cmb2_init', array($this, 'register_property_frontend_form'));
     }
 
-    public function register_user_frontend_form()
+    public function register_property_frontend_form()
     {
-        $cmb_user = new_cmb2_box(array(
-            'id'           => $this->prefix . 'user_frontend_form',
-            'object_types' => array('user'), // Tipe objek adalah 'user'
+        global $post;
+        $cmb_property = new_cmb2_box(array(
+            'id'           => $this->prefix . 'property_frontend_form',
+            'object_types' => array('property'), // Tipe objek adalah 'property'
             'hookup'       => false,
             'save_fields'  => false, // Kami akan menyimpan field secara manual
         ));
 
-        $cmb_user->add_field(array(
-            'name'    => 'Nama Lengkap',
-            'id'      => $this->prefix . 'full_name',
+        $cmb_property->add_field(array(
+            'name'    => 'Nama Properti',
+            'id'      => $this->prefix . 'title',
             'type'    => 'text',
         ));
 
-        $user_meta_province = $_POST[$this->prefix . 'province'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'province', true );
-        $cmb_user->add_field(array(
+        $cmb_property->add_field(array(
+            'name'    => 'Deskripsi Properti',
+            'id'      => $this->prefix . 'description',
+            'type'    => 'editor',
+        ));
+
+        $property_meta_province = $_POST[$this->prefix . 'province'] ?? get_post_meta( $post->ID, $this->prefix . 'province', true );
+        $cmb_property->add_field(array(
             'name'    => 'Povinsi',
             'id'      => $this->prefix . 'province',
             'type'    => 'select',
             'options' => ['' => 'Loading...'],
             'attributes' => [
-                'data-current' => $user_meta_province
+                'data-current' => $property_meta_province
             ]
         ));
 
-        $user_meta_city = $_POST[$this->prefix . 'city'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'city', true );
-        $cmb_user->add_field(array(
+        $property_meta_city = $_POST[$this->prefix . 'city'] ?? get_post_meta( $post->ID, $this->prefix . 'city', true );
+        $cmb_property->add_field(array(
             'name'    => 'Kota',
             'id'      => $this->prefix . 'city',
             'type'    => 'select',
             'options' => ['' => 'Loading...'],
             'attributes' => [
-                'data-current' => $user_meta_city
+                'data-current' => $property_meta_city
             ]
         ));
 
-        $user_meta_district = $_POST[$this->prefix . 'district'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'district', true );
-        $cmb_user->add_field(array(
+        $property_meta_district = $_POST[$this->prefix . 'district'] ?? get_post_meta( $post->ID, $this->prefix . 'district', true );
+        $cmb_property->add_field(array(
             'name'    => 'Kecamatan',
             'id'      => $this->prefix . 'district',
             'type'    => 'select',
             'options' => ['' => 'Loading...'],
             'attributes' => [
-                'data-current' => $user_meta_district
+                'data-current' => $property_meta_district
             ]
         ));
 
-        $cmb_user->add_field(array(
+        $cmb_property->add_field(array(
             'name'    => 'Address',
             'id'      => $this->prefix . 'address',
             'type'    => 'textarea',
@@ -66,13 +73,13 @@ class CMB2_Frontend_User_Meta_Bs
             ]
         ));
 
-        $cmb_user->add_field(array(
+        $cmb_property->add_field(array(
             'name'    => 'Phone Number',
             'id'      => $this->prefix . 'phone_number',
             'type'    => 'text',
         ));
 
-        $cmb_user->add_field(array(
+        $cmb_property->add_field(array(
             'name'    => 'Email',
             'id'      => $this->prefix . 'email',
             'type'    => 'text_email',
@@ -81,20 +88,20 @@ class CMB2_Frontend_User_Meta_Bs
 
     }
 
-    public function render_user_meta_form($atts = array())
+    public function render_property_meta_form($atts = array())
     {
-        if (!is_user_logged_in()) {
+        if (!is_property_logged_in()) {
             return '<p>You need to be logged in to edit your profile.</p>';
         }
 
-        // Current user
-        $user_id = get_current_user_id();
+        // Current property
+        $property_id = $post->ID;
 
         // Use ID of metabox in wds_frontend_form_register
-        $metabox_id = isset($atts['id']) ? esc_attr($atts['id']) : $this->prefix . 'user_frontend_form';
+        $metabox_id = isset($atts['id']) ? esc_attr($atts['id']) : $this->prefix . 'property_frontend_form';
 
         // Get CMB2 metabox object
-        $cmb = cmb2_get_metabox($metabox_id, $user_id);
+        $cmb = cmb2_get_metabox($metabox_id, $property_id);
 
         if (empty($cmb)) {
             return 'Metabox ID not found';
@@ -103,22 +110,22 @@ class CMB2_Frontend_User_Meta_Bs
         // Initiate our output variable
         $output = '';
 
-        $updated = $this->handle_submit($cmb, $user_id);
+        $updated = $this->handle_submit($cmb, $property_id);
         if ($updated) {
 
             if (is_wp_error($updated)) {
 
                 // If there was an error with the submission, add it to our output.
-                $output .= '<div class="alert alert-warning">' . sprintf(__('There was an error in the submission: %s', 'cmb2-user-submit'), '<strong>' . $updated->get_error_message() . '</strong>') . '</div>';
+                $output .= '<div class="alert alert-warning">' . sprintf(__('There was an error in the submission: %s', 'cmb2-property-submit'), '<strong>' . $updated->get_error_message() . '</strong>') . '</div>';
             } else {
 
                 // Add notice of submission
-                $output .= '<div class="alert alert-success">' . __('Your profile has been updated successfully.', 'cmb2-user-submit') . '</div>';
+                $output .= '<div class="alert alert-success">' . __('Your profile has been updated successfully.', 'cmb2-property-submit') . '</div>';
             }
         }
 
         // Get our form
-        $form = cmb2_get_metabox_form($cmb, $user_id, array('save_button' => __('Update Profile', 'cmb2-user-submit')));
+        $form = cmb2_get_metabox_form($cmb, $property_id, array('save_button' => __('Update Profile', 'cmb2-property-submit')));
 
         // Format our form use Bootstrap 5
         $styling = [
@@ -151,7 +158,7 @@ class CMB2_Frontend_User_Meta_Bs
         return $output;
     }
 
-    function handle_submit($cmb, $user_id)
+    function handle_submit($cmb, $property_id)
     {
 
         // If no form submission, bail
@@ -161,9 +168,9 @@ class CMB2_Frontend_User_Meta_Bs
         // Fetch sanitized values
         $sanitized_values = $cmb->get_sanitized_values($_POST);
 
-        // Loop through remaining (sanitized) data, and save to user-meta
+        // Loop through remaining (sanitized) data, and save to property-meta
         foreach ($sanitized_values as $key => $value) {
-            update_user_meta($user_id, $key, $value);
+            update_property_meta($property_id, $key, $value);
         }
 
         return true;
@@ -171,7 +178,7 @@ class CMB2_Frontend_User_Meta_Bs
 }
 
 // Inisialisasi kelas
-$CMB2_Frontend_User_Meta_Bs = new CMB2_Frontend_User_Meta_Bs();
+$CMB2_Frontend_Property_Submit = new CMB2_Frontend_Property_Submit();
 
 // Remove the action hook
-// remove_action('cmb2_init', array($CMB2_Frontend_User_Meta_Bs, 'register_user_frontend_form'));
+// remove_action('cmb2_init', array($CMB2_Frontend_Property_Submit, 'register_property_frontend_form'));
