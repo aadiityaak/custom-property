@@ -24,7 +24,7 @@ class CMB2_Frontend_User_Meta_Bs
             'type'    => 'text',
         ));
 
-        $user_meta_province = get_user_meta( get_current_user_id(), $this->prefix . 'province', true );
+        $user_meta_province = $_POST[$this->prefix . 'province'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'province', true );
         $cmb_user->add_field(array(
             'name'    => 'Povinsi',
             'id'      => $this->prefix . 'province',
@@ -35,7 +35,7 @@ class CMB2_Frontend_User_Meta_Bs
             ]
         ));
 
-        $user_meta_city = get_user_meta( get_current_user_id(), $this->prefix . 'city', true );
+        $user_meta_city = $_POST[$this->prefix . 'city'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'city', true );
         $cmb_user->add_field(array(
             'name'    => 'Kota',
             'id'      => $this->prefix . 'city',
@@ -127,9 +127,8 @@ class CMB2_Frontend_User_Meta_Bs
             'cmb2-upload-button'                        => 'cmb2-upload-button float-end mt-1',
             'button-secondary btn-sm btn btn-outline-secondary cmb-remove-row-button' => 'button-secondary btn btn-danger cmb-remove-row-button',
         ];
-        foreach ($styling as $std => $newf) {
-            $form = str_replace($std, $newf, $form);
-        }
+
+        $form = strtr($form, $styling);
 
         $output .= $form;
 
@@ -157,3 +156,6 @@ class CMB2_Frontend_User_Meta_Bs
 
 // Inisialisasi kelas
 $CMB2_Frontend_User_Meta_Bs = new CMB2_Frontend_User_Meta_Bs();
+
+// Remove the action hook
+remove_action('cmb2_init', array($CMB2_Frontend_User_Meta_Bs, 'register_user_frontend_form'));
