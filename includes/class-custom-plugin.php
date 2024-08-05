@@ -154,6 +154,8 @@ class Custom_Plugin
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-profile.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/cmb2-frontend-property-submit.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-login-shortcode.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-register-shortcode.php';
 
 		$this->loader = new Custom_Plugin_Loader();
 	}

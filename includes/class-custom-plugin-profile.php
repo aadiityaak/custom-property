@@ -140,7 +140,7 @@ class CMB2_Frontend_User_Meta_Bs
             'class="cmb-td"'                            => 'class="cmb-th w-100 p-0 pb-2"',
             'class="cmb-add-row"'                       => 'class="cmb-add-row text-end"',
             'button-secondary'                          => 'button-secondary btn-sm btn btn-outline-secondary',
-            'cmb2-upload-button'                        => 'cmb2-upload-button mt-1',
+            'cmb2-upload-button'                        => 'cmb2-upload-button mt-1 ms-0',
             'button-secondary btn-sm btn btn-outline-secondary cmb-remove-row-button' => 'button-secondary btn btn-danger cmb-remove-row-button',
         ];
 

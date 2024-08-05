@@ -30,7 +30,7 @@ class Custom_Plugin_Post_Types
                 ),
                 'public' => true,
                 'has_archive' => true,
-                'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
+                'supports' => array('title', 'editor', 'thumbnail'),
             )
         );
     }
