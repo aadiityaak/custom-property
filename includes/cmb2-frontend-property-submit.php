@@ -12,6 +12,7 @@ class CMB2_Frontend_Property_Submit
     public function register_property_frontend_form()
     {
         global $post;
+
         $cmb_property = new_cmb2_box(array(
             'id'           => $this->prefix . 'property_frontend_form',
             'object_types' => array('property'), // Tipe objek adalah 'property'
@@ -19,19 +20,23 @@ class CMB2_Frontend_Property_Submit
             'save_fields'  => false, // Kami akan menyimpan field secara manual
         ));
 
+        $title = isset($post->ID) ? get_post_meta( $post->ID, $this->prefix . 'title', true ) : '';
+        $property_meta_title = $_POST[$this->prefix . 'title'] ?? $title;
         $cmb_property->add_field(array(
             'name'    => 'Nama Properti',
             'id'      => $this->prefix . 'title',
             'type'    => 'text',
+            'default' => $property_meta_title
         ));
 
         $cmb_property->add_field(array(
             'name'    => 'Deskripsi Properti',
             'id'      => $this->prefix . 'description',
-            'type'    => 'editor',
+            'type'    => 'wysiwyg',
         ));
 
-        $property_meta_province = $_POST[$this->prefix . 'province'] ?? get_post_meta( $post->ID, $this->prefix . 'province', true );
+        $province = isset($post->ID) ? get_post_meta( $post->ID, $this->prefix . 'province', true ) : '';
+        $property_meta_province = $_POST[$this->prefix . 'province'] ?? $province;
         $cmb_property->add_field(array(
             'name'    => 'Povinsi',
             'id'      => $this->prefix . 'province',
@@ -42,7 +47,8 @@ class CMB2_Frontend_Property_Submit
             ]
         ));
 
-        $property_meta_city = $_POST[$this->prefix . 'city'] ?? get_post_meta( $post->ID, $this->prefix . 'city', true );
+        $city = isset($post->ID) ? get_post_meta( $post->ID, $this->prefix . 'city', true ) : '';
+        $property_meta_city = $_POST[$this->prefix . 'city'] ?? $city;
         $cmb_property->add_field(array(
             'name'    => 'Kota',
             'id'      => $this->prefix . 'city',
@@ -53,7 +59,8 @@ class CMB2_Frontend_Property_Submit
             ]
         ));
 
-        $property_meta_district = $_POST[$this->prefix . 'district'] ?? get_post_meta( $post->ID, $this->prefix . 'district', true );
+        $district = isset($post->ID) ? get_post_meta( $post->ID, $this->prefix . 'district', true ) : '';
+        $property_meta_district = $_POST[$this->prefix . 'district'] ?? $district;
         $cmb_property->add_field(array(
             'name'    => 'Kecamatan',
             'id'      => $this->prefix . 'district',
@@ -80,9 +87,27 @@ class CMB2_Frontend_Property_Submit
         ));
 
         $cmb_property->add_field(array(
-            'name'    => 'Email',
-            'id'      => $this->prefix . 'email',
-            'type'    => 'text_email',
+            'name'    => 'Featured Image',
+            'id'      => $this->prefix . 'featured_image',
+            'type'    => 'file',
+            'text'    => array(
+                'add_more' => 'Add image',
+                'remove'   => 'Remove image',
+                'add_upload_files_text' => 'Add image',
+            )
+        ));
+        $cmb_property->add_field(array(
+            'name'    => 'Gallery',
+            'id'      => $this->prefix . 'gallery',
+            'type'    => 'file_list',
+            'query_args' => array(
+                'type' => 'image',
+            ),
+            'text'    => array(
+                'add_more' => 'Add image',
+                'remove'   => 'Remove image',
+                'add_upload_files_text' => 'Add image',
+            )
         ));
 
 
@@ -90,9 +115,10 @@ class CMB2_Frontend_Property_Submit
 
     public function render_property_meta_form($atts = array())
     {
-        if (!is_property_logged_in()) {
+        if (!is_user_logged_in()) {
             return '<p>You need to be logged in to edit your profile.</p>';
         }
+        global $post;
 
         // Current property
         $property_id = $post->ID;
@@ -125,7 +151,7 @@ class CMB2_Frontend_Property_Submit
         }
 
         // Get our form
-        $form = cmb2_get_metabox_form($cmb, $property_id, array('save_button' => __('Update Profile', 'cmb2-property-submit')));
+        $form = cmb2_get_metabox_form($cmb, $property_id, array('save_button' => __('Simpan', 'cmb2-property-submit')));
 
         // Format our form use Bootstrap 5
         $styling = [
@@ -147,7 +173,7 @@ class CMB2_Frontend_Property_Submit
             'class="cmb-td"'                            => 'class="cmb-th w-100 p-0 pb-2"',
             'class="cmb-add-row"'                       => 'class="cmb-add-row text-end"',
             'button-secondary'                          => 'button-secondary btn-sm btn btn-outline-secondary',
-            'cmb2-upload-button'                        => 'cmb2-upload-button float-end mt-1',
+            'cmb2-upload-button'                        => 'cmb2-upload-button mt-1',
             'button-secondary btn-sm btn btn-outline-secondary cmb-remove-row-button' => 'button-secondary btn btn-danger cmb-remove-row-button',
         ];
 
@@ -168,9 +194,29 @@ class CMB2_Frontend_Property_Submit
         // Fetch sanitized values
         $sanitized_values = $cmb->get_sanitized_values($_POST);
 
+        // handle featured image
+        if (isset($sanitized_values['featured_image'])) {
+            set_post_thumbnail($property_id, $sanitized_values['featured_image']);
+        }
+
+        // handle title
+        if (isset($sanitized_values['title'])) {
+            $sanitized_values['title'] = sanitize_text_field($sanitized_values['title']);
+        }
+
+        // handle description
+        if (isset($sanitized_values['description'])) {
+            $sanitized_values['description'] = sanitize_text_field($sanitized_values['description']);
+        }
+
+        // unset array keys
+        unset($sanitized_values['featured_image']);
+        unset($sanitized_values['title']);
+        unset($sanitized_values['description']);
+
         // Loop through remaining (sanitized) data, and save to property-meta
         foreach ($sanitized_values as $key => $value) {
-            update_property_meta($property_id, $key, $value);
+            update_post_meta($property_id, $key, $value);
         }
 
         return true;
