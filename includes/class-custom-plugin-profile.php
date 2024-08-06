@@ -24,6 +24,12 @@ class CMB2_Frontend_User_Meta_Bs
             'type'    => 'text',
         ));
 
+        $cmb_user->add_field(array(
+            'name'    => 'Nama Toko',
+            'id'      => $this->prefix . 'nama_toko',
+            'type'    => 'text',
+        ));
+
         $user_meta_province = $_POST[$this->prefix . 'province'] ?? get_user_meta(get_current_user_id(), $this->prefix . 'province', true);
         $cmb_user->add_field(array(
             'name'    => 'Povinsi',
@@ -76,6 +82,21 @@ class CMB2_Frontend_User_Meta_Bs
             'name'    => 'Email',
             'id'      => $this->prefix . 'email',
             'type'    => 'text_email',
+        ));
+
+        $cmb_user->add_field(array(
+            'name'    => 'Bio',
+            'id'      => $this->prefix . 'bio',
+            'type'    => 'textarea',
+            'attributes' => [
+                'rows' => 2
+            ]
+        ));
+
+        $cmb_user->add_field(array(
+            'name'    => 'Poto Profil',
+            'id'      => $this->prefix . 'poto_profil',
+            'type'    => 'file',
         ));
     }
 
