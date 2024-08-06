@@ -139,6 +139,8 @@ class CMB2_Frontend_Form_Bs
     {
         $paged = isset($_GET['halaman']) ? $_GET['halaman'] : 1;
         $submit_page = get_option('submit_page');
+        $list_page = get_option('list_page');
+        echo $list_page;
         $user_id = get_current_user_id();
         $args = array(
             'post_type' => 'property',
@@ -158,7 +160,8 @@ class CMB2_Frontend_Form_Bs
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Title</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Price</th>
+                    <th scope="col" class="text-end">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -198,7 +201,6 @@ class CMB2_Frontend_Form_Bs
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
                     <li class="page-item"><a class="page-link" href="?halaman=1">First</a></li>
-                    <li class="page-item"><a class="page-link" href="?halaman=1">Previous</a></li>
                     <?php
                     for ($i = 1; $i <= $query->max_num_pages; $i++) {
                     ?>
@@ -206,7 +208,6 @@ class CMB2_Frontend_Form_Bs
                     <?php
                     }
                     ?>
-                    <li class="page-item"><a class="page-link" href="?halaman=1">Next</a></li>
                     <li class="page-item"><a class="page-link" href="?halaman=1">Last</a></li>
                 </ul>
             </nav>
@@ -238,6 +239,12 @@ class CMB2_Frontend_Form_Bs
             'name'    => 'Deskripsi Properti',
             'id'      => $this->prefix . 'description',
             'type'    => 'wysiwyg',
+        ));
+
+        $cmb_property->add_field(array(
+            'name'    => 'Harga Properti',
+            'id'      => $this->prefix . 'price',
+            'type'    => 'text',
         ));
 
         // Retrieve terms from the 'categories_property' taxonomy
