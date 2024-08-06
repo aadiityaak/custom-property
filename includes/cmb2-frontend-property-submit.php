@@ -118,6 +118,9 @@ class CMB2_Frontend_Form_Bs {
         return $output;
     }
     function handle_delete_property() {
+        // Ambil opsi halaman daftar dari pengaturan
+        $page_list = get_option('list_page');
+    
         // Pastikan nonce dan parameter ID valid
         if (!isset($_GET['id']) || !is_numeric($_GET['id']) || !isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'delete_property_nonce')) {
             wp_die('Invalid request');
@@ -127,13 +130,19 @@ class CMB2_Frontend_Form_Bs {
         // Hapus post
         wp_delete_post($id, true);
     
-        // Redirect kembali ke halaman daftar
-        wp_redirect(admin_url('edit.php?post_type=property'));
+        // Redirect kembali ke halaman yang ditentukan dalam opsi
+        if ($page_list) {
+            wp_redirect(get_permalink($page_list));
+        } else {
+            wp_redirect(get_site_url());
+        }
         exit();
     }
     function archive_property() {
         $paged = isset($_GET['halaman']) ? $_GET['halaman'] : 1;
         $submit_page = get_option('submit_page');
+        $list_page = get_option('list_page');
+        echo $list_page;
         $user_id = get_current_user_id();
         $args = array(
             'post_type' => 'property',
@@ -153,12 +162,13 @@ class CMB2_Frontend_Form_Bs {
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Title</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Price</th>
+                    <th scope="col" class="text-end">Action</th>
                 </tr>
             </thead>
             <tbody>
         <?php
-        if ($query->have_posts()) {
+        if ($query->have_posts() > 0) {
             while ($query->have_posts()) {
                 $query->the_post();
                 $delete_url = wp_nonce_url(
@@ -169,18 +179,42 @@ class CMB2_Frontend_Form_Bs {
                     'delete_property_nonce',
                     '_wpnonce'
                 );
+                $post_id = get_the_ID();
+                $price = get_post_meta(get_the_ID(), 'cp_price', true);
+                $price = $price ? $price : 0;
+                $price_format = number_format((int)$price, 0, ',', '.');
                 ?>
                 <tr>
-                    <th scope="row"><?php the_ID(); ?></th>
+                    <th scope="row"><?php echo $post_id; ?></th>
                     <td><?php the_title(); ?></td>
-                    <td>
-                        <a href="<?php the_permalink(); ?>" class="btn btn-primary">View</a>
-                        <a href="<?php echo get_the_permalink($submit_page); ?>?post_id=<?php the_ID(); ?>" class="btn btn-warning">Edit</a>
-                        <a href="<?php echo $delete_url; ?>" class="btn btn-danger">Delete</a>
+                    <td>Rp <?php echo $price_format; ?></td>
+                    <td class="text-end">
+                        <a href="<?php the_permalink(); ?>" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                            </svg>
+                        </a>
+                        <a href="<?php echo get_the_permalink($submit_page); ?>?post_id=<?php the_ID(); ?>" class="btn btn-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                            </svg>
+                        </a>
+                        <a href="<?php echo $delete_url; ?>" class="btn btn-danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                            </svg>
+                        </a>
                     </td>
                 </tr>
                 <?php
             }
+        } else {
+            ?>
+            <tr>
+                <td colspan="5" class="text-center">Tidak ada data. <a href="<?php echo get_permalink($submit_page); ?>" class="btn btn-primary btn-sm">Klik disini untuk tambah data</a></td>
+            </tr>
+            <?php
         }
         wp_reset_postdata();
         ?>
@@ -193,7 +227,6 @@ class CMB2_Frontend_Form_Bs {
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
                     <li class="page-item"><a class="page-link" href="?halaman=1">First</a></li>
-                    <li class="page-item"><a class="page-link" href="?halaman=1">Previous</a></li>
                     <?php
                     for ($i = 1; $i <= $query->max_num_pages; $i++) {
                         ?>
@@ -201,7 +234,6 @@ class CMB2_Frontend_Form_Bs {
                         <?php
                     }
                     ?>
-                    <li class="page-item"><a class="page-link" href="?halaman=1">Next</a></li>
                     <li class="page-item"><a class="page-link" href="?halaman=1">Last</a></li>
                 </ul>
             </nav>
@@ -233,6 +265,12 @@ class CMB2_Frontend_Form_Bs {
             'name'    => 'Deskripsi Properti',
             'id'      => $this->prefix . 'description',
             'type'    => 'wysiwyg',
+        ));
+
+        $cmb_property->add_field(array(
+            'name'    => 'Harga Properti',
+            'id'      => $this->prefix . 'price',
+            'type'    => 'text',
         ));
 
         $province = isset($post->ID) ? get_post_meta( $post->ID, $this->prefix . 'province', true ) : '';
