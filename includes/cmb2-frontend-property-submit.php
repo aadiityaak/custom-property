@@ -3,10 +3,11 @@ class CMB2_Frontend_Form_Bs {
 
     private $prefix = 'cp_';
     function initialize() {
-        add_shortcode( 'cp-submit-form', array( $this, 'form' ) );
+        add_shortcode( 'cp-property', array( $this, 'type' ) );
         add_action( 'init', array( $this, 'allow_subscriber_uploads' ) );
         add_action( 'pre_get_posts', array( $this, 'restrict_media_library' ) );
         add_action( 'cmb2_init', array( $this, 'register_property_frontend_form' ) );
+        add_action('admin_post_delete_property', array($this, 'handle_delete_property'));
     }
 
     /**
@@ -21,6 +22,16 @@ class CMB2_Frontend_Form_Bs {
      * @param  array  $atts Shortcode attributes
      * @return string       Form HTML markup
     */
+
+    function type( $atts = array() ) {
+        $type = $atts['type'] ?? 'list';
+        if($type === 'list'){
+            return $this->archive_property();
+        } else if ($type === 'submit') {
+            return $this->form();
+        }
+    }
+
     function form( $atts = array() ) {
         
         // Current user
@@ -100,7 +111,102 @@ class CMB2_Frontend_Form_Bs {
 
         $output .= $form;
 
+        // jika tidak login
+        if (!is_user_logged_in()) {
+            return '<div class="alert alert-warning">Silahkan login untuk menambahkan properti.</div>';
+        }
         return $output;
+    }
+    function handle_delete_property() {
+        // Pastikan nonce dan parameter ID valid
+        if (!isset($_GET['id']) || !is_numeric($_GET['id']) || !isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'delete_property_nonce')) {
+            wp_die('Invalid request');
+        }
+    
+        $id = intval($_GET['id']);
+        // Hapus post
+        wp_delete_post($id, true);
+    
+        // Redirect kembali ke halaman daftar
+        wp_redirect(admin_url('edit.php?post_type=property'));
+        exit();
+    }
+    function archive_property() {
+        $paged = isset($_GET['halaman']) ? $_GET['halaman'] : 1;
+        $submit_page = get_option('submit_page');
+        $user_id = get_current_user_id();
+        $args = array(
+            'post_type' => 'property',
+            'posts_per_page' => 20,
+            'paged' => $paged,
+            'orderby' => 'title',
+            'order' => 'ASC',
+            'author' => $user_id
+        );
+
+        $query = new WP_Query($args);
+
+        // The Loop
+        ?>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+        <?php
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $delete_url = wp_nonce_url(
+                    add_query_arg(array(
+                        'action' => 'delete_property',
+                        'id' => get_the_ID(),
+                    ), admin_url('admin-post.php')),
+                    'delete_property_nonce',
+                    '_wpnonce'
+                );
+                ?>
+                <tr>
+                    <th scope="row"><?php the_ID(); ?></th>
+                    <td><?php the_title(); ?></td>
+                    <td>
+                        <a href="<?php the_permalink(); ?>" class="btn btn-primary">View</a>
+                        <a href="<?php echo get_the_permalink($submit_page); ?>?post_id=<?php the_ID(); ?>" class="btn btn-warning">Edit</a>
+                        <a href="<?php echo $delete_url; ?>" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+                <?php
+            }
+        }
+        wp_reset_postdata();
+        ?>
+            </tbody>
+        </table>
+        <?php
+        // custom pagination with foreach
+        if ($query->max_num_pages > 1) {
+            ?>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="?halaman=1">First</a></li>
+                    <li class="page-item"><a class="page-link" href="?halaman=1">Previous</a></li>
+                    <?php
+                    for ($i = 1; $i <= $query->max_num_pages; $i++) {
+                        ?>
+                        <li class="page-item"><a class="page-link" href="?halaman=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+                        <?php
+                    }
+                    ?>
+                    <li class="page-item"><a class="page-link" href="?halaman=1">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?halaman=1">Last</a></li>
+                </ul>
+            </nav>
+            <?php
+        }
     }
 
     public function register_property_frontend_form()
