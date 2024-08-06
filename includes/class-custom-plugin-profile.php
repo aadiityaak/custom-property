@@ -5,7 +5,7 @@ class CMB2_Frontend_User_Meta_Bs
 
     public function __construct()
     {
-        add_shortcode('cmb-user-meta-form', array($this, 'render_user_meta_form'));
+        add_shortcode('edit-user', array($this, 'render_user_meta_form'));
         add_action('cmb2_init', array($this, 'register_user_frontend_form'));
     }
 
@@ -24,7 +24,7 @@ class CMB2_Frontend_User_Meta_Bs
             'type'    => 'text',
         ));
 
-        $user_meta_province = $_POST[$this->prefix . 'province'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'province', true );
+        $user_meta_province = $_POST[$this->prefix . 'province'] ?? get_user_meta(get_current_user_id(), $this->prefix . 'province', true);
         $cmb_user->add_field(array(
             'name'    => 'Povinsi',
             'id'      => $this->prefix . 'province',
@@ -35,7 +35,7 @@ class CMB2_Frontend_User_Meta_Bs
             ]
         ));
 
-        $user_meta_city = $_POST[$this->prefix . 'city'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'city', true );
+        $user_meta_city = $_POST[$this->prefix . 'city'] ?? get_user_meta(get_current_user_id(), $this->prefix . 'city', true);
         $cmb_user->add_field(array(
             'name'    => 'Kota',
             'id'      => $this->prefix . 'city',
@@ -46,7 +46,7 @@ class CMB2_Frontend_User_Meta_Bs
             ]
         ));
 
-        $user_meta_district = $_POST[$this->prefix . 'district'] ?? get_user_meta( get_current_user_id(), $this->prefix . 'district', true );
+        $user_meta_district = $_POST[$this->prefix . 'district'] ?? get_user_meta(get_current_user_id(), $this->prefix . 'district', true);
         $cmb_user->add_field(array(
             'name'    => 'Kecamatan',
             'id'      => $this->prefix . 'district',
@@ -77,8 +77,6 @@ class CMB2_Frontend_User_Meta_Bs
             'id'      => $this->prefix . 'email',
             'type'    => 'text_email',
         ));
-
-
     }
 
     public function render_user_meta_form($atts = array())

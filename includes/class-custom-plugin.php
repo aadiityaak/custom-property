@@ -116,7 +116,7 @@ class Custom_Plugin
 		/**
 		 * Class untuk mendaftarkan custom post type.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-post-type.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-custom-plugin-post-type.php';
 
 		/**
 		 * Class untuk menggunakan backend post fiel metabox io.
@@ -131,7 +131,7 @@ class Custom_Plugin
 		/**
 		 * The function to add custom customizer.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-cuztomizer.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/custom-cuztomizer.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
@@ -147,16 +147,16 @@ class Custom_Plugin
 		/**
 		 * Custom Function
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-function.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/custom-function.php';
 
 		/**
 		 * Custom Profile
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-profile.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/cmb2-frontend-property-submit.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-login-shortcode.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/custom-register-shortcode.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/property-admin-option.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-custom-plugin-profile.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cmb2-frontend-property-submit.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/custom-login-shortcode.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/custom-register-shortcode.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/property-admin-option.php';
 
 		$this->loader = new Custom_Plugin_Loader();
 	}
