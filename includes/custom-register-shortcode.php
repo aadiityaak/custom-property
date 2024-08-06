@@ -1,127 +1,142 @@
 <?php
 class Custom_Register_Shortcode {
+    private $sitekey;
+    private $secretkey;
 
     public function __construct() {
-        add_shortcode('custom-register', array($this, 'custom_register_shortcode'));
-        add_action('wp_footer', array($this, 'add_custom_register_styles'));
+        $captcha_velocity = get_option('captcha_velocity', []);
+        $captcha_aktif = isset($captcha_velocity['aktif']) ? $captcha_velocity['aktif'] : '';
+        $this->sitekey = isset($captcha_velocity['sitekey']) ? $captcha_velocity['sitekey'] : '';
+        $this->secretkey = isset($captcha_velocity['secretkey']) ? $captcha_velocity['secretkey'] : '';
+
+        add_shortcode('custom-register', [$this, 'render_register_form']);
+        add_shortcode('velocity_recaptcha', [$this, 'render_recaptcha']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
+        add_action('admin_post_nopriv_custom_register', [$this, 'handle_custom_register']);
+        add_action('admin_post_custom_register', [$this, 'handle_custom_register']);
     }
 
-    public function custom_register_shortcode($atts, $content = null) {
-        if (is_user_logged_in()) {
-            return '<div class="alert alert-success">Anda sudah terdaftar</div>';
-        }
+    public function enqueue_scripts() {
+        wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api.js', [], null, true);
+    }
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['custom_register_nonce'])) {
-            $this->handle_registration();
+    public function render_register_form() {
+        ob_start();
+        $status = $_GET['status'] ?? '';
+        if ($status == 'success') {
+            ?>
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                Registration successful!
+            </div>
+            <?php
+        } elseif ($status == 'failed') {
+            ?>
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                Registration failed! Try another username or email.
+                <a href="?" class="ms-auto btn btn-primary">Coba Lagi</a>
+            </div>
+            <?php
+        } else if ($status == 'captcha') {
+            ?>
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                Captcha failed!
+                <a href="?" class="ms-auto btn btn-primary">Coba Lagi</a>
+            </div>
+            <?php
+        } else if ($status == '') {
+        ?>
+        <form id="custom-register-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+            <p>
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </p>
+            <p>
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </p>
+            <p>
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </p>
+            <p>
+                <?php echo do_shortcode('[velocity_recaptcha]'); ?>
+            </p>
+            <p>
+                <button type="submit" class="btn btn-primary" id="submit-button">Register</button>
+            </p>
+            <input type="hidden" name="action" value="custom_register">
+        </form>
+        <?php
         }
+        return ob_get_clean();
+    }
 
+    public function render_recaptcha() {
+        $node = 'recaptcha-' . uniqid();
         ob_start();
         ?>
-        <div class="custom-register-form">
-            <div class="card">
-                <div class="card-body">
-                    <form method="post" action="">
-                        <div class="form-group">
-                            <label for="username"><?php _e('Username', 'textdomain'); ?></label>
-                            <input type="text" name="username" id="username" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email"><?php _e('Email', 'textdomain'); ?></label>
-                            <input type="email" name="email" id="email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password"><?php _e('Password', 'textdomain'); ?></label>
-                            <input type="password" name="password" id="password" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <?php $this->captcha_display(); ?>
-                        </div>
-                        <div class="form-group">
-                            <?php wp_nonce_field('custom_register_action', 'custom_register_nonce'); ?>
-                            <input type="submit" name="submit" class="button button-primary" value="<?php _e('Register', 'textdomain'); ?>">
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="<?php echo $node; ?>">
+            <div id="g-<?php echo $node; ?>" data-size="normal"></div>
+            <script type="text/javascript">
+                function onloadCallback<?php echo $node; ?>() {
+                    grecaptcha.render('g-<?php echo $node; ?>', {
+                        'sitekey': '<?php echo $this->sitekey; ?>',
+                        'callback': function() {
+                            var form = document.querySelector('.<?php echo $node; ?>').closest('form');
+                            form.querySelector('button[type="submit"]').disabled = false;
+                        },
+                        'expired-callback': function() {
+                            alert('Captcha expired, please refresh the page');
+                        }
+                    });
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    var form = document.querySelector('.<?php echo $node; ?>').closest('form');
+                    form.querySelector('button[type="submit"]').disabled = true;
+                });
+            </script>
+            <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback<?php echo $node; ?>&render=explicit" async defer></script>
         </div>
         <?php
         return ob_get_clean();
     }
 
-    prifate function captcha_display() {
-        
-    }
-    private function handle_registration() {
-        if (!isset($_POST['custom_register_nonce']) || !wp_verify_nonce($_POST['custom_register_nonce'], 'custom_register_action')) {
-            return;
-        }
+    public function handle_custom_register() {
+        if (isset($_POST['g-recaptcha-response'])) {
+            $recaptcha_response = sanitize_text_field($_POST['g-recaptcha-response']);
+            $response = wp_remote_get("https://www.google.com/recaptcha/api/siteverify?secret={$this->secretkey}&response={$recaptcha_response}");
+            $response_body = wp_remote_retrieve_body($response);
+            $result = json_decode($response_body, true);
+            $current_url = wp_get_referer();
 
-        $username = sanitize_text_field($_POST['username']);
-        $email = sanitize_email($_POST['email']);
-        $password = sanitize_text_field($_POST['password']);
-        $gresponse = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
+            if ($result['success']) {
+                $username = sanitize_user($_POST['username']);
+                $email = sanitize_email($_POST['email']);
+                $password = $_POST['password'];
 
-        $errors = new WP_Error();
+                $user_id = wp_create_user($username, $password, $email);
 
-        // Validasi reCAPTCHA
-        $recaptcha_verify = $this->captcha->verify($gresponse);
-        if (!$recaptcha_verify['success']) {
-            $errors->add('recaptcha_error', $recaptcha_verify['message']);
-        }
+                if (!is_wp_error($user_id)) {
+                    // Redirect to success page
+                    wp_redirect($current_url . '?status=success');
+                    exit;
 
-        if (username_exists($username)) {
-            $errors->add('username_exists', __('Username already exists.'));
-        }
-
-        if (!is_email($email)) {
-            $errors->add('invalid_email', __('Invalid email.'));
-        }
-
-        if (email_exists($email)) {
-            $errors->add('email_exists', __('Email already exists.'));
-        }
-
-        if (strlen($password) < 6) {
-            $errors->add('weak_password', __('Password must be at least 6 characters.'));
-        }
-
-        if (!empty($errors->errors)) {
-            foreach ($errors->get_error_messages() as $error) {
-                echo '<div class="alert alert-danger">' . esc_html($error) . '</div>';
+                } else if(is_wp_error($user_id)) { //berikan pesan error sesuai kondisi
+                    // Handle user creation error
+                    wp_redirect($current_url . '?status=failed');
+                    exit;
+                }
+            } else {
+                // Handle reCAPTCHA failure
+                wp_redirect($current_url . '?status=captcha');
+                exit;
             }
-            return;
-        }
-
-        $user_id = wp_create_user($username, $password, $email);
-
-        if (!is_wp_error($user_id)) {
-            echo '<div class="alert alert-success">' . __('Registration complete.') . '</div>';
         } else {
-            echo '<div class="alert alert-danger">' . $user_id->get_error_message() . '</div>';
-        }
-    }
-
-    public function add_custom_register_styles() {
-        global $post;
-        if (has_shortcode($post->post_content, 'custom-register')) {
-            echo '<style>
-                .custom-register-form #username,
-                .custom-register-form #email,
-                .custom-register-form #password {
-                    border: 1px solid #ccc;
-                    padding: 10px;
-                    width: 100%;
-                    border-radius: 5px;
-                    margin-bottom: 10px;
-                }
-                .custom-register-form .button-primary {
-                    background-color: #007bff;
-                    border-color: #007bff;
-                    border-radius: 5px !important;
-                }
-              </style>';
+            wp_redirect(wp_get_referer() . '?status=failed');
+            exit;
         }
     }
 }
 
+// Initialize the class
 new Custom_Register_Shortcode();
