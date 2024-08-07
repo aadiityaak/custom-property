@@ -362,18 +362,18 @@ class CMB2_Frontend_Form_Bs
             ]
         ));
 
-        $cmb_property->add_field(array(
-            'name' => __('Harga', 'theme-domain'),
-            'desc' => __('Jika sewa, masukkan harga sewa per tahun.', 'msft-newscenter'),
-            'id'   => $this->prefix . 'harga',
-            'type' => 'text',
-            'attributes' => array(
-                'type' => 'number',
-                'pattern' => '\d*',
-            ),
-            'sanitization_cb' => 'absint',
-            'escape_cb'       => 'absint',
-        ));
+        // $cmb_property->add_field(array(
+        //     'name' => __('Harga', 'theme-domain'),
+        //     'desc' => __('Jika sewa, masukkan harga sewa per tahun.', 'msft-newscenter'),
+        //     'id'   => $this->prefix . 'harga',
+        //     'type' => 'text',
+        //     'attributes' => array(
+        //         'type' => 'number',
+        //         'pattern' => '\d*',
+        //     ),
+        //     'sanitization_cb' => 'absint',
+        //     'escape_cb'       => 'absint',
+        // ));
 
         $cmb_property->add_field(array(
             'name' => __('Luas Tanah', 'theme-domain'),
@@ -442,30 +442,59 @@ class CMB2_Frontend_Form_Bs
 
         $cmb_property->add_field(array(
             'name' => __('Fasilitas', 'theme-domain'),
-            'desc' => __('Gunakan tanda koma untuk memisahkan fasilitas', 'msft-newscenter'),
-            'id'   => $this->prefix . 'fasilitas',
-            'type' => 'text',
-            'attributes' => array(
-                'placeholder' => 'AC, GYM, Kolam Renang',
+            'desc' => __('Tambahkan fasilitas yang tersedia', 'msft-newscenter'),
+            'id'   => $this->prefix . 'fasilitas_group',
+            'type' => 'group',
+            'options' => array(
+                'group_title'   => __('Fasilitas {#}', 'theme-domain'), // {#} akan digantikan dengan nomor item
+                'add_button'    => __('Tambah Fasilitas', 'theme-domain'),
+                'remove_button' => __('Hapus Fasilitas', 'theme-domain'),
+                'sortable'      => true, // membuat item bisa diurutkan
+            ),
+            'fields' => array(
+                array(
+                    'name' => __('Fasilitas', 'theme-domain'),
+                    'id'   => 'fasilitas',
+                    'type' => 'text',
+                    'attributes' => array(
+                        'placeholder' => 'Tuliskan fasilitas yang tersedia.',
+                    ),
+                ),
             ),
         ));
 
         $cmb_property->add_field(array(
             'name' => __('Kemudahan Akses Ke', 'theme-domain'),
-            'desc' => __('Gunakan tanda koma untuk memisahkan item', 'msft-newscenter'),
-            'id'   => $this->prefix . 'kemudahan-akses-ke',
-            'type' => 'text',
-            'attributes' => array(
-                'placeholder' => 'Jalan Tol, Sekolah, Rumah Sakit',
+            'desc' => __('Tambahkan kemudahan akses nya', 'msft-newscenter'),
+            'id'   => $this->prefix . 'kemudahan-akses-ke_group',
+            'type' => 'group',
+            'options' => array(
+                'group_title'   => __('Kemudahan Akses Ke {#}', 'theme-domain'), // {#} akan digantikan dengan nomor item
+                'add_button'    => __('Tambah Kemudahan', 'theme-domain'),
+                'remove_button' => __('Hapus Kemudahan', 'theme-domain'),
+                'sortable'      => true, // membuat item bisa diurutkan
+            ),
+            'fields' => array(
+                array(
+                    'name' => __('Kemudahan Akses Ke', 'theme-domain'),
+                    'id'   => 'kemudahan-akses-ke',
+                    'type' => 'text',
+                    'attributes' => array(
+                        'placeholder' => 'Tuliskan kemudahan akses nya.',
+                    ),
+                ),
             ),
         ));
 
-        $cmb_property->add_field(array(
-            'name' => __('Lokasi', 'theme-domain'),
-            'desc' => __('Isikan nama jalan atau lokasi spesifik', 'msft-newscenter'),
-            'id'   => $this->prefix . 'lokasi',
-            'type' => 'text',
-        ));
+        // $cmb_property->add_field(array(
+        //     'name' => __('Kemudahan Akses Ke', 'theme-domain'),
+        //     'desc' => __('Gunakan tanda koma untuk memisahkan item', 'msft-newscenter'),
+        //     'id'   => $this->prefix . 'kemudahan-akses-ke',
+        //     'type' => 'text',
+        //     'attributes' => array(
+        //         'placeholder' => 'Jalan Tol, Sekolah, Rumah Sakit',
+        //     ),
+        // ));
 
         $cmb_property->add_field(array(
             'name'    => 'Featured Image',
