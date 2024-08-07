@@ -161,7 +161,7 @@ class CMB2_Frontend_Form_Bs
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Title</th>
-                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
                     <th scope="col" class="text-end">Action</th>
                 </tr>
             </thead>
@@ -182,14 +182,10 @@ class CMB2_Frontend_Form_Bs
                         <tr>
                             <th scope="row"><?php the_ID(); ?></th>
                             <td><?php the_title(); ?></td>
-                            <td>Rp.
+                            <td>
                                 <?php
-                                $harga = get_user_meta(get_current_user_id(), 'cp_harga', true);
-                                if (!empty($harga)) {
-                                    echo number_format(floatval($harga), 0, ',', '.');
-                                } else {
-                                    echo '0';
-                                }
+                                $harga = get_post_meta(get_the_ID(), 'cp_status-properti', true);
+                                echo $harga;
                                 ?>
                             </td>
                             <td>

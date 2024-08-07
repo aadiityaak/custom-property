@@ -157,6 +157,7 @@ class Custom_Plugin
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/custom-login-shortcode.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/custom-register-shortcode.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/property-admin-option.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/wishlist.php';
 
 		$this->loader = new Custom_Plugin_Loader();
 	}

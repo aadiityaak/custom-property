@@ -20,7 +20,8 @@
  * @subpackage Custom_Plugin/public
  * @author     Velocity Developer
  */
-class Custom_Public {
+class Custom_Public
+{
 
 	/**
 	 * The ID of this plugin.
@@ -47,11 +48,11 @@ class Custom_Public {
 	 * @param      string    $plugin_name       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct($plugin_name, $version)
+	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -59,7 +60,8 @@ class Custom_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -73,8 +75,7 @@ class Custom_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/style.min.css', array(), $this->version, 'all' );
-
+		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/style.min.css', array(), $this->version, 'all');
 	}
 
 	/**
@@ -82,7 +83,8 @@ class Custom_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -96,21 +98,24 @@ class Custom_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( 'lockr-js', plugin_dir_url( __FILE__ ) . 'js/lockr.min.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( 'chained-custom-js', plugin_dir_url( __FILE__ ) . 'js/chained-custom.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/script.min.js', array( 'jquery' ), $this->version, false );
-		
+		wp_enqueue_script('lockr-js', plugin_dir_url(__FILE__) . 'js/lockr.min.js', array('jquery'), $this->version, false);
+		wp_enqueue_script('chained-custom-js', plugin_dir_url(__FILE__) . 'js/chained-custom.js', array('jquery'), $this->version, false);
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/script.min.js', array('jquery'), $this->version, false);
+
 		// Path ke file JSON
-		$json_state = plugin_dir_url( __FILE__ ) . 'data/state.json';
-		$json_city = plugin_dir_url( __FILE__ ) . 'data/city.json';
-		$json_district = plugin_dir_url( __FILE__ ) . 'data/district.json';
+		$json_state = plugin_dir_url(__FILE__) . 'data/state.json';
+		$json_city = plugin_dir_url(__FILE__) . 'data/city.json';
+		$json_district = plugin_dir_url(__FILE__) . 'data/district.json';
 
 		// Lokalisasi script dengan path JSON
-		wp_localize_script( $this->plugin_name, 'customPluginData', array(
+		wp_localize_script($this->plugin_name, 'customPluginData', array(
 			'jsonState' => $json_state,
 			'jsonCity' => $json_city,
 			'jsonDistrict' => $json_district
 		));
+		wp_localize_script($this->plugin_name, 'wishlist_ajax_object', array(
+			'ajax_url' => admin_url('admin-ajax.php'),
+			'nonce' => wp_create_nonce('wishlist_nonce')
+		));
 	}
-
 }
