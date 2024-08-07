@@ -126,7 +126,7 @@ class Custom_Plugin
 		/**
 		 * Class untuk register shortcode.
 		 */
-		// require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-custom-plugin-shortcode.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-custom-plugin-shortcode.php';
 
 		/**
 		 * The function to add custom customizer.

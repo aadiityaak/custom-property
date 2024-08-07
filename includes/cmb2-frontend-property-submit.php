@@ -362,19 +362,6 @@ class CMB2_Frontend_Form_Bs
             ]
         ));
 
-        // $cmb_property->add_field(array(
-        //     'name' => __('Harga', 'theme-domain'),
-        //     'desc' => __('Jika sewa, masukkan harga sewa per tahun.', 'msft-newscenter'),
-        //     'id'   => $this->prefix . 'harga',
-        //     'type' => 'text',
-        //     'attributes' => array(
-        //         'type' => 'number',
-        //         'pattern' => '\d*',
-        //     ),
-        //     'sanitization_cb' => 'absint',
-        //     'escape_cb'       => 'absint',
-        // ));
-
         $cmb_property->add_field(array(
             'name' => __('Luas Tanah', 'theme-domain'),
             'desc' => __('m2', 'msft-newscenter'),
@@ -466,7 +453,7 @@ class CMB2_Frontend_Form_Bs
         $cmb_property->add_field(array(
             'name' => __('Kemudahan Akses Ke', 'theme-domain'),
             'desc' => __('Tambahkan kemudahan akses nya', 'msft-newscenter'),
-            'id'   => $this->prefix . 'kemudahan-akses-ke_group',
+            'id'   => $this->prefix . 'kemudahan_akses_ke_group',
             'type' => 'group',
             'options' => array(
                 'group_title'   => __('Kemudahan Akses Ke {#}', 'theme-domain'), // {#} akan digantikan dengan nomor item
@@ -477,7 +464,7 @@ class CMB2_Frontend_Form_Bs
             'fields' => array(
                 array(
                     'name' => __('Kemudahan Akses Ke', 'theme-domain'),
-                    'id'   => 'kemudahan-akses-ke',
+                    'id'   => 'kemudahan_akses_ke',
                     'type' => 'text',
                     'attributes' => array(
                         'placeholder' => 'Tuliskan kemudahan akses nya.',
