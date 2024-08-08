@@ -11,6 +11,11 @@ class Custom_Plugin_Shortcode
      */
     public function __construct()
     {
+        add_shortcode('search', array($this, 'search')); 
+        add_shortcode('velocity-daftar-agen', array($this, 'velocity_daftar_agen'));
+        add_shortcode('velocity-post-loop', array($this, 'velocity_post_loop'));
+        add_shortcode('velocity-cat-frame', array($this, 'velocity_cat_frame')); 
+        add_shortcode('velocity-author-properti', array($this, 'velocity_author_properti'));
         add_shortcode('custom-plugin', array($this, 'custom_plugin_text_shortcode_callback')); // [custom-plugin]
         add_shortcode('slider-properti', array($this, 'custom_gallery_slider_shortcode'));
         add_shortcode('harga-properti', array($this, 'format_price_shortcode'));
@@ -184,7 +189,31 @@ class Custom_Plugin_Shortcode
     <?php
         return ob_get_clean();
     }
-
+    public function vsstemmart_taxonomy_image_url($term_id = NULL, $size = 'full', $return_placeholder = FALSE) {
+        if (!$term_id) {
+            if (is_category())
+                $term_id = get_query_var('categories_property');
+            elseif (is_tag())
+                $term_id = get_query_var('tag_id');
+            elseif (is_tax()) {
+                $current_term = get_term_by('slug', get_query_var('term'), get_query_var('taxonomy'));
+                $term_id = $current_term->term_id;
+            }
+        }
+        
+        $taxonomy_image_url = get_option('vsstemmart_taxonomy_image'.$term_id);
+        if(!empty($taxonomy_image_url)) {
+            $attachment_id = vsstemmart_get_attachment_id_by_url($taxonomy_image_url);
+            if(!empty($attachment_id)) {
+                $taxonomy_image_url = wp_get_attachment_image_src($attachment_id, $size);
+                $taxonomy_image_url = $taxonomy_image_url[0];
+            }
+        }
+        if ($return_placeholder)
+            return ($taxonomy_image_url != '') ? $taxonomy_image_url : VSSTEMMART_PLACEHOLDER;
+        else
+            return $taxonomy_image_url;
+    }
     // Fungsi untuk menampilkan fasilitas
     public function custom_fasilitas_property()
     {
@@ -203,6 +232,231 @@ class Custom_Plugin_Shortcode
         </ul>
     <?php
         return ob_get_clean();
+    }
+
+    public function search(){
+        $s = isset($_GET['s'])?$_GET['s']:'';
+        $jenis = isset($_GET['jenis'])?$_GET['jenis']:'';
+        if ($jenis=='beli'){
+            $checkbeli = 'checked';
+        } elseif($jenis=='sewa'){
+            $checksewa = 'checked';
+        } else {
+            $checkbeli = 'checked';
+            $checksewa = '';
+        }
+        $html = '';
+        $html .= '<form action="'.get_home_url().'" class="needs-validation" novalidate>';
+            $html .= '<div class="form-atas row text-center">';
+            $html .= '<div class="col-md-6"><input id="jual" type="radio" name="jenis" value="jual" '.$checkbeli.'><label for="jual">BELI PROPERTY</label></div>';
+            $html .= '<div class="col-md-6"><input id="sewa" type="radio" name="jenis" value="sewa" '.$checksewa.'><label for="sewa">SEWA PROPERTY</label></div>';
+            $html .= '<div style="clear:both"></div>';
+            $html .= '</div>';
+          $html .= '<div class="form-bawah mt-3">';
+            $html .= '<input type="text" name="s" placeholder="Cari Properti" value="'.$s.'" required="required">';
+            $html .= '<button type="submit" class="text-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="black" class="bi bi-search text-dark" viewBox="0 0 16 16"> <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/> </svg></button>';
+          $html .= '</div>';
+        $html .= '</form>';
+        
+        return $html;
+    }
+    public function velocity_cat_frame($atts) {
+        // Ambil atribut dan tetapkan default jika tidak ada
+        $atts = shortcode_atts(array(
+            'slugs' => '', // Slugs kategori, dipisahkan dengan koma
+        ), $atts);
+
+        // $categories ambil dari terms categories_property
+        $categories = get_terms(array(
+            'taxonomy' => 'categories_property',
+            'hide_empty' => 0
+        ));
+    
+        // Inisialisasi output
+        $output = '<div class="velocity-category-frame">';
+        
+        // Nav tabs
+        $output .= '<div class="row justify-content-center text-center mx-auto">';
+        foreach($categories as $index => $category) {
+            // echo '<pre>'.print_r(get_taxonomy_image($category), 1).'</pre>';
+            $img_icon = z_taxonomy_image_url($category->term_id);
+            $output .= '<div class="col-3 mb-4" role="presentation">';
+            $output .= '<a class="d-block" href="'.get_category_link( $category->term_id ).'" role="tab" aria-controls="content-' . $category->term_id . '" aria-selected="false">';
+            if($img_icon){
+                $output .= '<img class=" " src="'.$img_icon.'" />';
+            } else {
+                $output .= '<img src="'.get_template_directory_uri().'/img/all.png" />';
+            }
+            $output .= '<div class="mt-2 text-dark textt">'.$category->name.'</div>';
+            $output .= '</a>';
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+    
+        $output .= '</div>';
+    
+        return $output;
+    }
+    function velocity_post_loop($atts) {
+        // Extract shortcode attributes
+        $atts = shortcode_atts(
+            array(
+                'post_id' => get_the_ID(),
+            ),
+            $atts
+        );
+    
+        // Get post meta data
+        $post_id = $atts['post_id'];
+        $lokasi = get_post_meta($post_id, 'cp_city', true);
+        $kamartidur = get_post_meta($post_id, 'jumlahkamartidur', true);
+        $kamarmandi = get_post_meta($post_id, 'jumlahkamarmandi', true);
+        $luasbangunan = get_post_meta($post_id, 'luasbangunan', true);
+    
+        // Build the output
+        ob_start();
+        ?>
+        <div class="velocity-post-loop" id="post-<?php echo $post_id; ?>">
+                <div class="velocity-post-thumbnail">
+                <div class="ratio ratio-16x9">
+                    <img src="<?php echo get_the_post_thumbnail_url($post_id, 'large'); ?>" alt="" />
+                </div>
+                </div>
+                <div class="p-3 position-relative">
+                    <h6 class="mb-2"><a class="text-dark" href="<?php echo get_the_permalink($post_id); ?>"><strong><?php echo get_the_title($post_id); ?></strong></a></h6>
+                    <div class="property-content mb-2">
+                        <div class="mb-2 text-primary"><strong><?php echo 'Rp. ' . number_format((int)get_post_meta($post_id, 'cp_price', true)); ?></strong></div>
+                        <div class="mb-2"><i class="fa fa-map-marker" aria-hidden="true"></i> <?php echo $lokasi; ?></div>
+                        <i class="fa fa-bed"></i> <small><?php echo $kamartidur; ?></small> | <i class="fa fa-bath"></i> <small><?php echo $kamarmandi; ?></small> | <i class="fa fa-home"></i> <small><?php echo $luasbangunan; ?> m2</small>
+                    </div>
+                    <?php echo do_shortcode("[velocity-author-properti post_id='".$post_id."' contact='true']"); ?>
+                </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    function velocity_author_properti($atts) {
+        global $post;
+        
+        // Extract shortcode attributes
+        $atts = shortcode_atts(
+            array(
+                'post_id' => $post->ID,
+                'contact' => false,
+            ),
+            $atts
+        );
+    
+        // Get post meta data
+        $contact = $atts['contact'];
+        $post_id = $atts['post_id'];
+        $this_post = get_post($post_id);
+        $user_id = $this_post->post_author;
+        
+        $udata	= get_userdata( $user_id );
+        $hp   = get_user_meta($user_id,'cp_phone_number',true);
+        if (substr($hp, 0, 1) === '0') {
+            $wa    = '62' . substr($hp, 1);
+        } else if (substr($hp, 0, 1) === '+') {
+            $wa    = '' . substr($hp, 1);
+        }
+    
+        // Ambil URL avatar
+        $url_ava = get_user_meta($user_id, 'cp_poto_profil', true);
+    
+        // Ambil nama pengguna
+        $user_name = get_user_meta($user_id, 'namatoko', true);
+        if (!$user_name) {
+            $user_name = get_the_author_meta('display_name', $user_id);
+        }
+        
+        $html = '<div class="mb-0 d-flex align-items-center">';
+    
+        // Buat output HTML
+        //$html .= '<div class="velocity-author-properti col">';
+            $html .= '<div class="justify-content-start">';
+                $html .= '<a class="text-dark" href="' . esc_url(get_author_posts_url($user_id)) . '"><img class="rounded-circle mr-2" width="40" src="' . esc_url($url_ava) . '" alt="' . esc_attr($user_name) . '" /></a>';
+            $html .= '</div>';
+            $html .= '<div class="flex-fill ms-1 me-1">';
+                $html .= '<b><a class="text-dark" href="' . esc_url(get_author_posts_url($user_id)) . '">' . esc_html($user_name) . '</a></b>';
+            $html .= '</div>';
+        //$html .= '</div>';
+        
+        if($contact == true){
+            $html .= '<div class="d-flex mt-2">
+            <a class="velocity-author-contact btn btn-sm btn-info btn-icon-only rounded-circle me-1" target="_blank" href="mailto:'.$udata->user_email.'"><i class="fa fa-envelope"></i></a>
+            <a class="velocity-author-contact btn btn-sm btn-success btn-icon-only rounded-circle me-1" target="_blank" href="https://wa.me/'.$wa.'"><i class="fa fa-whatsapp"></i></a>
+            <a class="velocity-author-contact btn btn-sm btn-dark btn-icon-only rounded-circle me-1" target="_blank" href="tel:'.$hp.'"><i class="fa fa-phone"></i></a>
+            </div>';
+        }
+        $html .= '</div>';
+    
+        return $html;
+    }
+
+
+    function velocity_daftar_agen($atts) {
+        // Set default atribut
+        $atts = shortcode_atts(array(
+            'count' => 4, // Default jumlah pengguna yang ditampilkan adalah 5
+        ), $atts);
+        $count = $atts['count'];
+    
+        // Dapatkan pengguna dengan peran subscriber secara acak
+        $args = array(
+            'role'    => 'subscriber',
+            'orderby' => 'rand',
+        );
+        if($count){
+            $args['number']  = $count;
+        }
+        $users = get_users($args);
+    
+        // Inisialisasi output
+        $output = '<div class="velocity-daftar-agen row">';
+    
+        // Loop melalui pengguna dan buat output HTML
+        foreach ($users as $user) {
+            
+            $profile_url = esc_url(get_author_posts_url($user->ID));
+            
+            $display_name = get_user_meta($user->ID, 'namatoko', true);
+            if (!$display_name) {
+                $display_name = esc_html($user->display_name);
+            }
+            $profile_image_id = get_user_meta($user->ID, 'profile_image', true);
+            $url_img = wp_get_attachment_image_url($profile_image_id, 'full');
+            if ($url_img) {
+                $url_ava = aq_resize($url_img, 200, 200, true, true, true);
+            } else {
+                $url_ava = get_template_directory_uri() . "/img/user.png";
+            }
+    
+            $output .= '<div class="col-6 col-md-3 mb-4 p-1 p-md-2">';
+            $output .= '<div class="border bg-white shadow-md py-3 px-2 text-center">';
+                $output .= '<div class="mb-2"><a href="' . $profile_url . '"><img src="' . $url_ava . '" /></a></div>';
+                $output .= '<div class="font-weight-bold"><a class="text-dark" href="' . $profile_url . '">' . $display_name . '</a></div>';
+                $output .= do_shortcode('[alamat id="' . $user_id . '" kosong="yes"]');
+                $hp   = get_user_meta($user_id,'nohp',true);
+                $nowa = get_user_meta($user_id,'nowa',true);
+                if (substr($nowa, 0, 1) === '0') {
+                    $wa    = '62' . substr($nowa, 1);
+                } else if (substr($nowa, 0, 1) === '+') {
+                    $wa    = '' . substr($nowa, 1);
+                }
+                $output .= '<div class="mt-2 d-flex justify-content-center">
+                <a class="velocity-author-contact btn btn-sm btn-info btn-icon-only rounded-circle mr-1" target="_blank" href="mailto:'.$user->user_email.'"><i class="fa fa-envelope"></i></a>
+                <a class="velocity-author-contact btn btn-sm btn-success btn-icon-only rounded-circle mr-1" target="_blank" href="https://wa.me/'.$wa.'"><i class="fa fa-whatsapp"></i></a>
+                <a class="velocity-author-contact btn btn-sm btn-dark btn-icon-only rounded-circle mr-1" target="_blank" href="tel:'.$hp.'"><i class="fa fa-phone"></i></a>
+                </div>';
+            $output .= '</div>';
+            $output .= '</div>';
+        }
+    
+        $output .= '</div>';
+    
+        return $output;
     }
 
     // Fungsi untuk menampilkan Kemudahan Akses
